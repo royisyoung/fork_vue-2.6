@@ -2,6 +2,7 @@
 
 import { warn } from 'core/util/index'
 
+// 引入对属性、class、元素操作的工具方法
 export * from './attrs'
 export * from './class'
 export * from './element'

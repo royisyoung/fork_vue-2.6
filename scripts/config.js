@@ -25,7 +25,9 @@ const weexFactoryPlugin = {
   }
 }
 
+// 单独声明文件路径的别名
 const aliases = require('./alias')
+// 为路径别名做匹配并拼接
 const resolve = p => {
   const base = p.split('/')[0]
   if (aliases[base]) {
@@ -121,11 +123,17 @@ const builds = {
   },
   // Runtime+compiler development build (Browser)
   'web-full-dev': {
+    // 入口文件
     entry: resolve('web/entry-runtime-with-compiler.js'),
+    // 打包后的目的地文件
     dest: resolve('dist/vue.js'),
+    // 打包格式
     format: 'umd',
+    // 环境名
     env: 'development',
+    // 别名
     alias: { he: './entity-decoder' },
+    // 文件头：版本、作者、License等信息
     banner
   },
   // Runtime+compiler production build  (Browser)
@@ -263,6 +271,8 @@ function genConfig (name) {
   return config
 }
 
+// 判断环境变量是否有 TARGET
+// 如果有则使用genConfig()生成rollup配置文件
 if (process.env.TARGET) {
   module.exports = genConfig(process.env.TARGET)
 } else {

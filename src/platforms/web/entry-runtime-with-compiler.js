@@ -15,12 +15,15 @@ const idToTemplate = cached(id => {
 })
 
 const mount = Vue.prototype.$mount
+// 重写$mount，为mount做预处理
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
+
   el = el && query(el)
 
+  // el不能是body或html
   /* istanbul ignore if */
   if (el === document.body || el === document.documentElement) {
     process.env.NODE_ENV !== 'production' && warn(
@@ -30,6 +33,7 @@ Vue.prototype.$mount = function (
   }
 
   const options = this.$options
+  // 没有render参数，将模板转成render函数，否则直接mount挂载DOM
   // resolve template/el and convert to render function
   if (!options.render) {
     let template = options.template

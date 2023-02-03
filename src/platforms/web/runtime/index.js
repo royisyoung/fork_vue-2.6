@@ -19,6 +19,7 @@ import { patch } from './patch'
 import platformDirectives from './directives/index'
 import platformComponents from './components/index'
 
+// 注册平台相关的通用方法
 // install platform specific utils
 Vue.config.mustUseProp = mustUseProp
 Vue.config.isReservedTag = isReservedTag
@@ -26,13 +27,16 @@ Vue.config.isReservedAttr = isReservedAttr
 Vue.config.getTagNamespace = getTagNamespace
 Vue.config.isUnknownElement = isUnknownElement
 
+// 通过extend 注册内置的组件和指令
 // install platform runtime directives & components
 extend(Vue.options.directives, platformDirectives)
 extend(Vue.options.components, platformComponents)
 
+// 在 Vue 的原型上注册 __patch__ 函数：把虚拟DOM转化成真实DOM
 // install platform patch function
 Vue.prototype.__patch__ = inBrowser ? patch : noop
 
+// $mount 方法初始定义：渲染DOM
 // public mount method
 Vue.prototype.$mount = function (
   el?: string | Element,
@@ -42,6 +46,7 @@ Vue.prototype.$mount = function (
   return mountComponent(this, el, hydrating)
 }
 
+// 调试工具hook
 // devtools global hook
 /* istanbul ignore next */
 if (inBrowser) {

@@ -1,6 +1,6 @@
 /*!
  * Vue.js v2.6.14
- * (c) 2014-2023 Evan You
+ * (c) 2014-2021 Evan You
  * Released under the MIT License.
  */
 (function (global, factory) {
@@ -46,7 +46,7 @@
 
   /**
    * Quick object check - this is primarily used to tell
-   * objects from primitive values when we know the value
+   * Objects from primitive values when we know the value
    * is a JSON-compliant type.
    */
   function isObject (obj) {
@@ -7620,9 +7620,7 @@
     }
     var on = vnode.data.on || {};
     var oldOn = oldVnode.data.on || {};
-    // vnode is empty when removing all listeners,
-    // and use old vnode dom element
-    target$1 = vnode.elm || oldVnode.elm;
+    target$1 = vnode.elm;
     normalizeEvents(on);
     updateListeners(on, oldOn, add$1, remove$2, createOnceHandler$1, vnode.context);
     target$1 = undefined;
@@ -7630,8 +7628,7 @@
 
   var events = {
     create: updateDOMListeners,
-    update: updateDOMListeners,
-    destroy: function (vnode) { return updateDOMListeners(vnode, emptyNode); }
+    update: updateDOMListeners
   };
 
   /*  */
@@ -9068,7 +9065,6 @@
 
   /*  */
 
-  // 注册平台相关的通用方法
   // install platform specific utils
   Vue.config.mustUseProp = mustUseProp;
   Vue.config.isReservedTag = isReservedTag;
@@ -9076,16 +9072,13 @@
   Vue.config.getTagNamespace = getTagNamespace;
   Vue.config.isUnknownElement = isUnknownElement;
 
-  // 通过extend 注册内置的组件和指令
   // install platform runtime directives & components
   extend(Vue.options.directives, platformDirectives);
   extend(Vue.options.components, platformComponents);
 
-  // 在 Vue 的原型上注册 __patch__ 函数：把虚拟DOM转化成真实DOM
   // install platform patch function
   Vue.prototype.__patch__ = inBrowser ? patch : noop;
 
-  // $mount 方法初始定义：渲染DOM
   // public mount method
   Vue.prototype.$mount = function (
     el,
@@ -9095,7 +9088,6 @@
     return mountComponent(this, el, hydrating)
   };
 
-  // 调试工具hook
   // devtools global hook
   /* istanbul ignore next */
   if (inBrowser) {
@@ -9188,7 +9180,7 @@
       }
     }
     if (staticClass) {
-      el.staticClass = JSON.stringify(staticClass.replace(/\s+/g, ' ').trim());
+      el.staticClass = JSON.stringify(staticClass);
     }
     var classBinding = getBindingAttr(el, 'class', false /* getStatic */);
     if (classBinding) {
@@ -11932,15 +11924,12 @@
   });
 
   var mount = Vue.prototype.$mount;
-  // 重写$mount，为mount做预处理
   Vue.prototype.$mount = function (
     el,
     hydrating
   ) {
-
     el = el && query(el);
 
-    // el不能是body或html
     /* istanbul ignore if */
     if (el === document.body || el === document.documentElement) {
       warn(
@@ -11950,7 +11939,6 @@
     }
 
     var options = this.$options;
-    // 没有render参数，将模板转成render函数，否则直接mount挂载DOM
     // resolve template/el and convert to render function
     if (!options.render) {
       var template = options.template;
