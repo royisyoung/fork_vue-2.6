@@ -44,6 +44,8 @@ export function isObject (obj: mixed): boolean %checks {
 
 /**
  * Get the raw type string of a value, e.g., [object Object].
+ * 获取值的原始类型字符串
+ * 
  */
 const _toString = Object.prototype.toString
 
@@ -52,8 +54,8 @@ export function toRawType (value: any): string {
 }
 
 /**
- * Strict object type check. Only returns true
- * for plain JavaScript objects.
+ * Strict object type check. Only returns true for plain JavaScript objects.
+ * 严格的对象类型检查。仅对普通JavaScript对象返回true。
  */
 export function isPlainObject (obj: any): boolean {
   return _toString.call(obj) === '[object Object]'
@@ -119,6 +121,7 @@ export function makeMap (
 
 /**
  * Check if a tag is a built-in tag.
+ * 检查是否是内置标签
  */
 export const isBuiltInTag = makeMap('slot,component', true)
 
@@ -160,6 +163,8 @@ export function cached<F: Function> (fn: F): F {
 
 /**
  * Camelize a hyphen-delimited string.
+ * 将连字符分隔的字符串转为驼峰式
+ * 'Ssf-SRr' => 'SsfSRr'
  */
 const camelizeRE = /-(\w)/g
 export const camelize = cached((str: string): string => {
@@ -214,6 +219,7 @@ export const bind = Function.prototype.bind
 
 /**
  * Convert an Array-like object to a real Array.
+ * 转化类数组(list)对象为一个真的数组，并去除前start个元素
  */
 export function toArray (list: any, start?: number): Array<any> {
   start = start || 0
@@ -227,6 +233,7 @@ export function toArray (list: any, start?: number): Array<any> {
 
 /**
  * Mix properties into target object.
+ * 混入属性到目标对象
  */
 export function extend (to: Object, _from: ?Object): Object {
   for (const key in _from) {

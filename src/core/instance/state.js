@@ -48,6 +48,7 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 
 export function initState (vm: Component) {
   vm._watchers = []
+  // 初始化$options中的属性：props、methods、data、computed、watch
   const opts = vm.$options
   if (opts.props) initProps(vm, opts.props)
   if (opts.methods) initMethods(vm, opts.methods)
@@ -69,6 +70,7 @@ function initProps (vm: Component, propsOptions: Object) {
   // instead of dynamic object key enumeration.
   const keys = vm.$options._propKeys = []
   const isRoot = !vm.$parent
+  // TODO not understand
   // root instance props should be converted
   if (!isRoot) {
     toggleObserving(false)
@@ -103,6 +105,7 @@ function initProps (vm: Component, propsOptions: Object) {
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
+    // vue.extend()的时候，静态props已经代理到组件的属性。我们只需要在实例上声明代理props
     if (!(key in vm)) {
       proxy(vm, `_props`, key)
     }
@@ -112,11 +115,13 @@ function initProps (vm: Component, propsOptions: Object) {
 
 function initData (vm: Component) {
   let data = vm.$options.data
+  // 获取data对象，并缓存
   data = vm._data = typeof data === 'function'
     ? getData(data, vm)
     : data || {}
   if (!isPlainObject(data)) {
     data = {}
+    // data如果不是[object Object], 就告警
     process.env.NODE_ENV !== 'production' && warn(
       'data functions should return an object:\n' +
       'https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
@@ -130,6 +135,7 @@ function initData (vm: Component) {
   let i = keys.length
   while (i--) {
     const key = keys[i]
+    // 非生产环境下，如果methods中已存在、props中已存在，就告警
     if (process.env.NODE_ENV !== 'production') {
       if (methods && hasOwn(methods, key)) {
         warn(
@@ -145,10 +151,15 @@ function initData (vm: Component) {
         vm
       )
     } else if (!isReserved(key)) {
+      // 判断如果是以下划线 _ 或 $ 开头，就不会注入到 Vue 实例中
+      // 否则，通过proxy方法把它注入到Vue实例中
+      // 结果：通过this._data[key]设置和获取
       proxy(vm, `_data`, key)
     }
   }
   // observe data
+  // 把data转化为响应式对象
+  // asRootData 注释表示这是根数据（根实例的 data 选项）
   observe(data, true /* asRootData */)
 }
 
@@ -168,6 +179,7 @@ export function getData (data: Function, vm: Component): any {
 const computedWatcherOptions = { lazy: true }
 
 function initComputed (vm: Component, computed: Object) {
+  // 声明_computedWatchers
   // $flow-disable-line
   const watchers = vm._computedWatchers = Object.create(null)
   // computed properties are just getters during SSR
@@ -177,12 +189,14 @@ function initComputed (vm: Component, computed: Object) {
     const userDef = computed[key]
     const getter = typeof userDef === 'function' ? userDef : userDef.get
     if (process.env.NODE_ENV !== 'production' && getter == null) {
+      // 若非生产环境下，没有getter要告警
       warn(
         `Getter is missing for computed property "${key}".`,
         vm
       )
     }
 
+    // 不是服务端渲染，就实例化getter为watcher对象挂载到当前实例上
     if (!isSSR) {
       // create internal watcher for the computed property.
       watchers[key] = new Watcher(
@@ -196,9 +210,11 @@ function initComputed (vm: Component, computed: Object) {
     // component-defined computed properties are already defined on the
     // component prototype. We only need to define computed properties defined
     // at instantiation here.
+    // 组件声明的计算属性已经在组件原型上声明。我们只需要在实例上声明计算属性。
     if (!(key in vm)) {
       defineComputed(vm, key, userDef)
     } else if (process.env.NODE_ENV !== 'production') {
+      // 检查重名并告警
       if (key in vm.$data) {
         warn(`The computed property "${key}" is already defined in data.`, vm)
       } else if (vm.$options.props && key in vm.$options.props) {
@@ -266,6 +282,7 @@ function initMethods (vm: Component, methods: Object) {
   const props = vm.$options.props
   for (const key in methods) {
     if (process.env.NODE_ENV !== 'production') {
+      // 非生产环境下，如果不是function、props中已存在、是保留字，则告警
       if (typeof methods[key] !== 'function') {
         warn(
           `Method "${key}" has type "${typeof methods[key]}" in the component definition. ` +
@@ -286,6 +303,7 @@ function initMethods (vm: Component, methods: Object) {
         )
       }
     }
+    // 挂载到实例，如果不是函数则用空函数替代
     vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm)
   }
 }
@@ -327,6 +345,7 @@ export function stateMixin (Vue: Class<Component>) {
   dataDef.get = function () { return this._data }
   const propsDef = {}
   propsDef.get = function () { return this._props }
+  // 非生产环境下，禁止对属性赋值
   if (process.env.NODE_ENV !== 'production') {
     dataDef.set = function () {
       warn(
@@ -339,12 +358,15 @@ export function stateMixin (Vue: Class<Component>) {
       warn(`$props is readonly.`, this)
     }
   }
+  // 使用Object.defineProperty定义$data、$props, 使禁用set生效
   Object.defineProperty(Vue.prototype, '$data', dataDef)
   Object.defineProperty(Vue.prototype, '$props', propsDef)
 
+  // 挂载全局set、delete
   Vue.prototype.$set = set
   Vue.prototype.$delete = del
 
+  // 挂载全局watch
   Vue.prototype.$watch = function (
     expOrFn: string | Function,
     cb: any,

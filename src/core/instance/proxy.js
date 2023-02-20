@@ -76,6 +76,8 @@ if (process.env.NODE_ENV !== 'production') {
   }
 
   initProxy = function initProxy (vm) {
+    // 若支持Proxy，则使用new Proxy初始化_renderProxy
+    // 否则设置成Vue实例
     if (hasProxy) {
       // determine which proxy handler to use
       const options = vm.$options

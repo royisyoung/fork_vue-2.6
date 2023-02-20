@@ -25,6 +25,7 @@ import {
  * Option overwriting strategies are functions that handle
  * how to merge a parent option value and a child option
  * value into the final value.
+ * 选项覆盖策略是处理如何将父选项值和子选项值合并为最终值的函数, 即一个合并覆盖的策略
  */
 const strats = config.optionMergeStrategies
 
@@ -260,6 +261,7 @@ strats.provide = mergeDataOrFn
 
 /**
  * Default strategy.
+ * 默认策略
  */
 const defaultStrat = function (parentVal: any, childVal: any): any {
   return childVal === undefined
@@ -269,6 +271,7 @@ const defaultStrat = function (parentVal: any, childVal: any): any {
 
 /**
  * Validate component names
+ * 检验组件名称
  */
 function checkComponents (options: Object) {
   for (const key in options.components) {
@@ -294,6 +297,7 @@ export function validateComponentName (name: string) {
 /**
  * Ensure all props option syntax are normalized into the
  * Object-based format.
+ * 确保所有属性选项语法都规范化为基于对象的格式。
  */
 function normalizeProps (options: Object, vm: ?Component) {
   const props = options.props
@@ -331,6 +335,7 @@ function normalizeProps (options: Object, vm: ?Component) {
 
 /**
  * Normalize all injections into Object-based format
+ * 将全部的注入规范化为基于对象的格式
  */
 function normalizeInject (options: Object, vm: ?Component) {
   const inject = options.inject
@@ -358,6 +363,7 @@ function normalizeInject (options: Object, vm: ?Component) {
 
 /**
  * Normalize raw function directives into object format.
+ * 将全部的原始函数指令规范化为基本对象的格式
  */
 function normalizeDirectives (options: Object) {
   const dirs = options.directives
@@ -383,21 +389,26 @@ function assertObjectType (name: string, value: any, vm: ?Component) {
 
 /**
  * Merge two option objects into a new one.
+ * 合并两个对象并生成一个新的
  * Core utility used in both instantiation and inheritance.
+ * 在实例化和继承中都使用的核心实用程序
  */
 export function mergeOptions (
   parent: Object,
   child: Object,
   vm?: Component
 ): Object {
+  // 若非生产环境，需要校验组件（其实就是校验一下名称，不能是内置标签名，不能是保留字符，要符w3c规范）
   if (process.env.NODE_ENV !== 'production') {
     checkComponents(child)
   }
 
+  // 若子对象是一个函数，就把子对象的options赋给子对象
   if (typeof child === 'function') {
     child = child.options
   }
 
+  // 规范化props、injections、directives
   normalizeProps(child, vm)
   normalizeInject(child, vm)
   normalizeDirectives(child)
@@ -406,6 +417,8 @@ export function mergeOptions (
   // but only if it is a raw options object that isn't
   // the result of another mergeOptions call.
   // Only merged options has the _base property.
+  // 子option上应用extends和mixins，前提是他是一个原始option对象，而不是另一个mergeOptions调用的结果
+  // 只有合并过的选项上有_base属性
   if (!child._base) {
     if (child.extends) {
       parent = mergeOptions(parent, child.extends, vm)

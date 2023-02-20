@@ -33,14 +33,17 @@ export function initLifecycle (vm: Component) {
   const options = vm.$options
 
   // locate first non-abstract parent
+  // 找到第一个非抽象父类
   let parent = options.parent
   if (parent && !options.abstract) {
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
+    // 将当前组件添加到父组件的$children中
     parent.$children.push(vm)
   }
 
+  // 初始化组件父子关系、$ref，静态变量
   vm.$parent = parent
   vm.$root = parent ? parent.$root : vm
 
@@ -56,6 +59,8 @@ export function initLifecycle (vm: Component) {
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
+  // _update方法会把VNode渲染成真实DOM
+  // 首次渲染和数据更新时调用
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
@@ -64,6 +69,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
+    // 若无前置vnode，则为首次渲染
+    // 调用__patch__，把虚拟DOM转换成真实DOM，最终挂载到 $el
     if (!prevVnode) {
       // initial render
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
@@ -73,6 +80,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
     restoreActiveInstance()
     // update __vue__ reference
+    // 更新__vue__的参考
     if (prevEl) {
       prevEl.__vue__ = null
     }
@@ -87,6 +95,8 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // updated in a parent's updated hook.
   }
 
+
+  // 强制更新
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
     if (vm._watcher) {
@@ -94,6 +104,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
   }
 
+  // 销毁实例
   Vue.prototype.$destroy = function () {
     const vm: Component = this
     if (vm._isBeingDestroyed) {

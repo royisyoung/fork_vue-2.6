@@ -12,6 +12,8 @@ import { bindObjectListeners } from './bind-object-listeners'
 import { resolveScopedSlots } from './resolve-scoped-slots'
 import { bindDynamicKeys, prependModifier } from './bind-dynamic-keys'
 
+// 这里的方法都和渲染相关，将来在编译的时候使用
+// 在把模板编译成render函数时，render函数会调用这些方法
 export function installRenderHelpers (target: any) {
   target._o = markOnce
   target._n = toNumber

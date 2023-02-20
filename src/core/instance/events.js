@@ -10,11 +10,15 @@ import {
 import { updateListeners } from '../vdom/helpers/index'
 
 export function initEvents (vm: Component) {
+  // 初始化_events为空对象
+  // _events: {'click': [fn1, fn2]}
   vm._events = Object.create(null)
   vm._hasHookEvent = false
   // init parent attached events
+  // 获取父组件上附加的事件
   const listeners = vm.$options._parentListeners
   if (listeners) {
+    // 把当前父组件上附加的事情注册到当前组件上
     updateComponentListeners(vm, listeners)
   }
 }
@@ -54,10 +58,12 @@ export function eventsMixin (Vue: Class<Component>) {
   Vue.prototype.$on = function (event: string | Array<string>, fn: Function): Component {
     const vm: Component = this
     if (Array.isArray(event)) {
+      // 如果绑定多个事件，则循环调用$on
       for (let i = 0, l = event.length; i < l; i++) {
         vm.$on(event[i], fn)
       }
     } else {
+      // 向事件列表中添加回调函数
       (vm._events[event] || (vm._events[event] = [])).push(fn)
       // optimize hook:event cost by using a boolean flag marked at registration
       // instead of a hash lookup

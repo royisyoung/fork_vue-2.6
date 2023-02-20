@@ -5,6 +5,7 @@ import { warn, hasSymbol } from '../util/index'
 import { defineReactive, toggleObserving } from '../observer/index'
 
 export function initProvide (vm: Component) {
+  // 获取选项中的provide注入到vm._provide中
   const provide = vm.$options.provide
   if (provide) {
     vm._provided = typeof provide === 'function'
@@ -47,9 +48,17 @@ export function resolveInject (inject: any, vm: Component): ?Object {
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
       // #6574 in case the inject object is observed...
+      // 响应式产生的对象存在__ob__，需要跳过
       if (key === '__ob__') continue
+      // inject: {
+      //   foo: {
+      //     from: 'bar', // 指定源property
+      //     default: 'foo' // 指定默认值
+      //   }
+      // }
       const provideKey = inject[key].from
       let source = vm
+      // 自下而上查找对应的provide
       while (source) {
         if (source._provided && hasOwn(source._provided, provideKey)) {
           result[key] = source._provided[provideKey]
@@ -57,6 +66,8 @@ export function resolveInject (inject: any, vm: Component): ?Object {
         }
         source = source.$parent
       }
+
+      // TODO not understand
       if (!source) {
         if ('default' in inject[key]) {
           const provideDefault = inject[key].default
